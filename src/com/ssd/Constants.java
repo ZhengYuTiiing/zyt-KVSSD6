@@ -5,8 +5,9 @@ package com.ssd;
 public class Constants {
     // 原有的模拟器常量
     public static final int PAGE_SIZE = 32 * 1024;       // 32KB 页大小
-    public static final long BLOCK_SIZE = 4 * 1024 * 1024; // 4MB 块大小
-    public static final int MAX_MEMTABLE_SIZE = 4 * 1024 * 1024 - 32*1024; // 4MB Memtable 阈值
+   // public static final long BLOCK_SIZE = 4 * 1024 * 1024; // 4MB 块大小
+   public static final long BLOCK_SIZE = 8 * 32 * 1024; //
+    public static final int MAX_MEMTABLE_SIZE =  8* 32 * 1024 - 32*1024; // 4MB Memtable 阈值
     public static final int LEVEL_RATIO = 10;            // LSM 层级比例
     public static final double GC_THRESHOLD = 0.7;       // GC 触发阈值
     public static final int REMAP_THRESHOLD = 2;         // 重映射阈值
@@ -27,7 +28,7 @@ public class Constants {
     };
 
     // 新增：持久化路径（确保程序有权限读写）
-    public static String PERSIST_DIR = "./data/rtdata_data/"; // 总持久化目录
+    public static String PERSIST_DIR = "./data/kvssd1/"; // 总持久化目录
     public static final String SST_DIR = PERSIST_DIR + "ssts/";   // SSTable 存储目录
     public static final String BLOCK_META_DIR = PERSIST_DIR + "block_meta/"; // 物理块元数据目录
     public static final String SST_META_SUFFIX = ".txt";         // SSTable 元数据文件后缀
