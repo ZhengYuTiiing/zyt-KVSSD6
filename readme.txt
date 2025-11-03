@@ -1,7 +1,7 @@
 这个是试图实现共享的重叠页（shared overlap page）
 
 项目运行手册
-再根目录下
+在根目录下
 编译：
 javac -d classes src/com/ssd/*.java
 

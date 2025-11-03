@@ -27,7 +27,7 @@ public class KVSSD6{
     private final Map<Long, PhysicalBlock> physicalBlocks;
     private final Queue<Long> freeBlocks;
     private int nextPageNo;
-    private final Stats stats;
+    private Stats stats;
     // 元数据区专用块（独立于数据区的physicalBlocks）
     private final Map<Long, PhysicalBlock> metaPhysicalBlocks;
     private final Queue<Long> metaFreeBlocks; // 元数据区空闲块队列
@@ -1031,7 +1031,7 @@ public class KVSSD6{
 
         // 1. 核心参数：SSTable大小阈值（论文3.B“Flash块对齐”设计）
         // 论文3.2节提到“nLSM树为SSTable独占一个Flash块”，此处按Flash块大小设置SSTable最大KV页数
-        int maxKvPagesPerSst = 128; // 假设Flash块含128个32KB页（论文2.2节FTL设计：块=128页）
+        int maxKvPagesPerSst = (int) (Constants.BLOCK_SIZE / Constants.PAGE_SIZE); // 假设Flash块含128个32KB页（论文2.2节FTL设计：块=128页）
         List<Pair<String, String>> currentSstKvEntries = new ArrayList<>(); // 当前正在构建的SSTable的KV页条目
 
         // 2. 遍历排序后的KV页条目，按规则拆分（论文3.C“合并排序+无重叠拆分”逻辑）
@@ -1144,7 +1144,7 @@ public class KVSSD6{
     private List<SSTable> newSplitIntoNonOverlappingSsts(List<Pair<String, String>> allKvPageEntries, int targetLevel){
         List<SSTable> newSSTables = new ArrayList<>();
         List<Pair<String, String>> currentGroup = new ArrayList<>();
-        int maxKvPagesPerSst = 128;
+        int maxKvPagesPerSst = (int) (Constants.BLOCK_SIZE / Constants.PAGE_SIZE);
         int currentCount = 0;
         for (int i = 0; i < allKvPageEntries.size(); i++) {
             Pair<String, String> currentPair = allKvPageEntries.get(i);
@@ -1189,7 +1189,7 @@ public class KVSSD6{
                         return null;
                     }
                     // 4.3 计算新SSTable的键范围（论文3.C：SSTable键范围=所有KV页键范围的并集）
-                    String[] newSstKeyRangeParts = currentGroup.get(currentGroup.size()-128).second.split("\\|"); // 注意转义竖线（|在正则中需转义）
+                    String[] newSstKeyRangeParts = currentGroup.get(currentGroup.size()-(int) (Constants.BLOCK_SIZE / Constants.PAGE_SIZE)).second.split("\\|"); // 注意转义竖线（|在正则中需转义）
                     String newSstMinKey = newSstKeyRangeParts[0].trim(); // 去除空格，确保键比较准确
                     String newSstMaxKey = next.second.split("\\|")[0].trim();
                     newSst.keyRange = new Pair<>(newSstMinKey, newSstMaxKey); // 赋值SSTable键范围
@@ -1274,7 +1274,7 @@ public class KVSSD6{
     private List<SSTable> newnewSplitIntoNonOverlappingSsts(List<Pair<String, String>> allKvPageEntries, int targetLevel){
         List<SSTable> newSSTables = new ArrayList<>();
         List<Pair<String, String>> currentGroup = new LinkedList<>();
-        int maxKvPagesPerSst = 128;
+        int maxKvPagesPerSst = (int) (Constants.BLOCK_SIZE / Constants.PAGE_SIZE);
         int currentCount = 0;
         for (int i = 0; i < allKvPageEntries.size(); i++) {
             Pair<String, String> currentPair = allKvPageEntries.get(i);
@@ -1321,7 +1321,7 @@ public class KVSSD6{
                         return null;
                     }
                     // 4.3 计算新SSTable的键范围（论文3.C：SSTable键范围=所有KV页键范围的并集）
-                    String[] newSstKeyRangeParts = currentGroup.get(currentGroup.size()-128).second.split("\\|"); // 注意转义竖线（|在正则中需转义）
+                    String[] newSstKeyRangeParts = currentGroup.get(currentGroup.size()-(int) (Constants.BLOCK_SIZE / Constants.PAGE_SIZE)).second.split("\\|"); // 注意转义竖线（|在正则中需转义）
                     String newSstMinKey = newSstKeyRangeParts[0].trim(); // 去除空格，确保键比较准确
                     String newSstMaxKey = next.second.split("\\|")[0].trim();
                     newSst.keyRange = new Pair<>(newSstMinKey, newSstMaxKey); // 赋值SSTable键范围
@@ -2231,6 +2231,12 @@ public class KVSSD6{
         copy.read0Flash = stats.read0Flash;
         copy.read1Flash = stats.read1Flash;
         copy.read2Flash = stats.read2Flash;
+        copy.read3Flash = stats.read3Flash;
+        copy.read4Flash = stats.read4Flash;
+        copy.read5Flash = stats.read5Flash;
+        copy.read6Flash = stats.read6Flash;
+        copy.read7Flash = stats.read7Flash;
+        copy.read8Flash = stats.read8Flash;
         copy.readMoreFlash = stats.readMoreFlash;
         return copy;
     }
@@ -2301,16 +2307,16 @@ public class KVSSD6{
         public double writeAmplification;// 写入放大
         public long totalFlashWrites; // 闪存总写入字节
         public long totalFlashReads; // 闪存总读取次数
-        public long read0Flash; // 0次闪存访问的读取
-        public long read1Flash; // 1次闪存访问的读取
-        public long read2Flash; // 2次闪存访问的读取
-        public long read3Flash; // 3次闪存访问的读取
-        public long read4Flash; // 4次闪存访问的读取
-        public long read5Flash; // 5次闪存访问的读取
-        public long read6Flash; // 6次闪存访问的读取
-        public long read7Flash; // 7次闪存访问的读取
-        public long read8Flash; // 8次闪存访问的读取
-        public long readMoreFlash; // 8次以上闪存访问的读取
+        public int read0Flash; // 0次闪存访问的读取
+        public int read1Flash; // 1次闪存访问的读取
+        public int read2Flash; // 2次闪存访问的读取
+        public int read3Flash; // 3次闪存访问的读取
+        public int read4Flash; // 4次闪存访问的读取
+        public int read5Flash; // 5次闪存访问的读取
+        public int read6Flash; // 6次闪存访问的读取
+        public int read7Flash; // 7次闪存访问的读取
+        public int read8Flash; // 8次闪存访问的读取
+        public int readMoreFlash; // 8次以上闪存访问的读取
 
         public Stats() {
             // 默认初始化所有字段为 0

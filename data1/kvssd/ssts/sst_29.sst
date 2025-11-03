@@ -1,0 +1,15 @@
+==========================================================================
+                        SSTable (Sorted String Table)
+==========================================================================
+SST_ID=29
+LEVEL=1
+KEY_RANGE_START=key_0qh2AIMFrUuaOTgcwjzZQDWPbIKXUKhy6pNeG3nGcpZw
+KEY_RANGE_END=key_21274roLIXFS7c2Fa5BuB6bD7A0DgEVXibd29E0RHa4R
+METADATA_PAGE_PPA=457_28
+KV_PAGE_COUNT=0
+KV_PAIR_COUNT=0
+CREATION_TIME=2025-10-29 19:50:21
+==========================================================================
+
+==========================================================================
+SSTable file ends here. All data is stored in plain text format.
